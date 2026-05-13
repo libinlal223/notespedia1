@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, Syringe } from "lucide-react";
 
 // Register ScrollTrigger
 if (typeof window !== "undefined") {
@@ -28,6 +28,7 @@ export default function CinematicScrollPage() {
   const [images, setImages] = useState<HTMLImageElement[]>([]);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
 
   // Disable scrolling while loading
   useEffect(() => {
@@ -171,6 +172,20 @@ export default function CinematicScrollPage() {
       },
     });
 
+    // Fade out scroll indicator
+    if (indicatorRef.current) {
+      gsap.to(indicatorRef.current, {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          end: "+=300",
+          scrub: true,
+        },
+        opacity: 0,
+        y: 20,
+      });
+    }
+
     // Handle component unmount
     return () => {
       cancelAnimationFrame(rafId);
@@ -185,27 +200,27 @@ export default function CinematicScrollPage() {
     <main className="bg-black text-white min-h-screen">
       {/* Loading Screen */}
       <div
-        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-black transition-opacity duration-1000 ${
+        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-1000 ${
           isLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
-        <div className="text-4xl font-light tracking-widest tabular-nums text-white mb-8">
+        <div className="text-4xl font-light tracking-widest tabular-nums text-black mb-8">
           {progress}%
         </div>
         
         <div className="relative w-64 md:w-96">
           {/* Stethoscope Icon moving along the track */}
           <div 
-            className="absolute bottom-6 -translate-x-1/2 transition-all duration-300 ease-out text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+            className="absolute bottom-6 -translate-x-1/2 transition-all duration-300 ease-out text-black drop-shadow-[0_0_10px_rgba(0,0,0,0.3)]"
             style={{ left: `${progress}%` }}
           >
             <Stethoscope className="w-8 h-8 animate-pulse" strokeWidth={1.5} />
           </div>
 
           {/* Loading Track */}
-          <div className="h-[2px] w-full bg-white/10 relative overflow-hidden rounded-full">
+          <div className="h-[2px] w-full bg-black/10 relative overflow-hidden rounded-full">
             <div 
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-white/50 to-white transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-transparent via-black/50 to-black transition-all duration-300 ease-out rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)]"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -219,6 +234,21 @@ export default function CinematicScrollPage() {
             ref={canvasRef}
             className="h-full w-full object-cover block"
           />
+          
+          {/* Scroll Down Indicator */}
+          <div 
+            ref={indicatorRef}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-black/80 z-40 transition-opacity"
+            style={{ opacity: isLoaded ? 1 : 0 }}
+          >
+            <span 
+              className="tracking-wider" 
+              style={{ fontFamily: 'cursive', fontSize: '0.75rem' }}
+            >
+              Scroll to explore
+            </span>
+            <Syringe className="w-5 h-5 animate-bounce rotate-180" strokeWidth={1.5} />
+          </div>
         </div>
       </div>
     </main>
